@@ -1,0 +1,31 @@
+const hre = require("hardhat");
+
+async function main() {
+  const bridgeAddress = process.env.BRIDGE_ADDRESS;
+  const transactionId = process.env.TRANSACTION_ID;
+
+  if (!bridgeAddress || !transactionId) {
+    throw new Error("Please set BRIDGE_ADDRESS and TRANSACTION_ID in your .env file");
+  }
+
+  console.log("Withdrawing tokens from expired bridge transfer...");
+  console.log("Bridge address:", bridgeAddress);
+  console.log("Transaction ID:", transactionId);
+
+  const bridge = await hre.ethers.getContractAt("SKALEBitcoinBridge", bridgeAddress);
+  
+  try {
+    const tx = await bridge.withdraw(transactionId);
+    await tx.wait();
+    console.log("Tokens withdrawn successfully");
+  } catch (error) {
+    console.error("Failed to withdraw tokens:", error);
+  }
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  }); 

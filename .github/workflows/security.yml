@@ -1,0 +1,79 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Install Dependencies
+      run: npm install
+        
+    - name: Run MythX Analysis
+      run: |
+        npm install -g mythx-cli
+        mythx --api-key ${{ secrets.MYTHX_API_KEY }} analyze
+      continue-on-error: true
+        
+    - name: Run Echidna
+      run: |
+        docker pull trailofbits/echidna
+        docker run -v ${{ github.workspace }}:/code trailofbits/echidna echidna-test /code/contracts/
+      continue-on-error: true
+        
+    - name: Run Manticore
+      run: |
+        pip3 install manticore
+        manticore contracts/ --contract-name BridgeContract
+      continue-on-error: true
+        
+    - name: Run Securify
+      uses: eth-sri/securify2-action@v1
+      with:
+        files: 'contracts/**/*.sol'
+        
+    - name: Run Dependencies Audit
+      run: |
+        npm audit
+        cargo audit
+      continue-on-error: true
+        
+    - name: Check for Outdated Dependencies
+      run: |
+        npm outdated
+        cargo outdated
+      continue-on-error: true
+        
+    - name: Run SAST Scan
+      uses: github/codeql-action/analyze@v2
+      with:
+        languages: javascript, typescript, solidity
+        
+    - name: Generate Security Report
+      run: |
+        echo "Security Scan Results" > security-report.md
+        echo "===================" >> security-report.md
+        echo "## MythX Results" >> security-report.md
+        cat mythx-report.json >> security-report.md
+        echo "## Securify Results" >> security-report.md
+        cat securify-report.json >> security-report.md
+        
+    - name: Upload Security Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-report
+        path: security-report.md 

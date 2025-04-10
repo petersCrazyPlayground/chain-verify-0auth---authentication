@@ -1,0 +1,79 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+      - '**/contracts/**/*.sol'
+      - '**/programs/**/*.rs'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**/*.md'
+      - '**/contracts/**/*.sol'
+      - '**/programs/**/*.rs'
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: Install Dependencies
+      run: |
+        npm install
+        pip install mkdocs mkdocs-material
+        pip install solidity-docgen
+        cargo install mdbook
+        
+    - name: Generate Solidity Documentation
+      run: |
+        npx solidity-docgen --solc-module solc-0.8 \
+          --input ./contracts \
+          --output ./docs/contracts \
+          --templates ./docs/templates
+          
+    - name: Generate Rust Documentation
+      run: |
+        cd programs
+        cargo doc --no-deps --document-private-items
+        cp -r target/doc ../docs/rust-docs
+        
+    - name: Build MkDocs Site
+      run: |
+        mkdocs build
+        
+    - name: Build mdBook Documentation
+      run: |
+        cd docs
+        mdbook build
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
+        
+    - name: Upload Documentation Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation
+        path: |
+          site/
+          docs/contracts/
+          docs/rust-docs/ 

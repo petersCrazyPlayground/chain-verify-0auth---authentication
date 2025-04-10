@@ -1,0 +1,31 @@
+{
+  "name": "skale-bitcoin-bridge",
+  "version": "1.0.0",
+  "description": "Bridge contract for transferring tokens between SKALE and Bitcoin networks",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy:skale": "npx hardhat run scripts/deploy.js --network skale",
+    "deploy:bitcoin": "npx hardhat run scripts/deploy.js --network bitcoin",
+    "verify:skale": "npx hardhat verify --network skale",
+    "verify:bitcoin": "npx hardhat verify --network bitcoin"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@typechain/ethers-v6": "^0.4.0",
+    "@typechain/hardhat": "^8.0.0",
+    "chai": "^4.3.4",
+    "dotenv": "^16.0.3",
+    "ethers": "^6.0.0",
+    "hardhat": "^2.19.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "solidity-coverage": "^0.8.0",
+    "typechain": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+} 

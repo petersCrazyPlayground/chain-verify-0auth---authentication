@@ -1,0 +1,102 @@
+name: Main CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  evm-contracts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install Dependencies
+      run: |
+        cd $GITHUB_WORKSPACE
+        npm install
+        
+    - name: Run Hardhat Tests
+      run: |
+        npx hardhat compile
+        npx hardhat test
+      env:
+        INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        
+    - name: Run Slither Analysis
+      uses: crytic/slither-action@v0.3.0
+      
+    - name: Run Contract Size Check
+      run: npx hardhat size-contracts
+
+  solana-contracts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        components: rustfmt, clippy
+        
+    - name: Install Solana CLI
+      run: |
+        sh -c "$(curl -sSfL https://release.solana.com/v1.17.0/install)"
+        export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+        solana --version
+        
+    - name: Install Anchor CLI
+      run: |
+        npm install -g @coral-xyz/anchor-cli
+        anchor --version
+        
+    - name: Build Solana Programs
+      run: |
+        anchor build
+        
+    - name: Run Solana Tests
+      run: |
+        anchor test
+      env:
+        ANCHOR_PROVIDER_URL: "https://api.devnet.solana.com"
+        ANCHOR_WALLET: ${{ secrets.SOLANA_KEYPAIR }}
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Install Dependencies
+      run: npm install
+        
+    - name: Run ESLint
+      run: npx eslint .
+      
+    - name: Run Prettier
+      run: npx prettier --check .
+      
+    - name: Run Solhint
+      run: npx solhint 'contracts/**/*.sol'
+      
+    - name: Check Rust formatting
+      run: |
+        rustup component add rustfmt
+        cargo fmt -- --check 

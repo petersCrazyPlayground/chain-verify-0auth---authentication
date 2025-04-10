@@ -1,0 +1,19 @@
+{
+  "name": "grail-x-cross-chain",
+  "version": "1.0.0",
+  "description": "Cross-chain bridge implementation for Avalanche, Solana, and Bitcoin networks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "blockchain",
+    "bridge",
+    "cross-chain",
+    "avalanche",
+    "solana",
+    "bitcoin"
+  ],
+  "author": "Grail X",
+  "license": "MIT"
+} 

@@ -1,0 +1,28 @@
+{
+  "name": "bridge-avalanche-polygon",
+  "version": "1.0.0",
+  "description": "Bridge implementation for cross-chain transfers between Avalanche and Polygon",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.ts --network",
+    "verify": "hardhat verify"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.0",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^18.11.18",
+    "chai": "^4.3.6",
+    "hardhat": "^2.12.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  }
+} 
