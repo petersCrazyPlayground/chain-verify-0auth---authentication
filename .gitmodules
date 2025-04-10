@@ -1,0 +1,3 @@
+[submodule "core/multichain-wallet"]
+	path = core/multichain-wallet
+	url = https://github.com/petersCrazyPlayground/Web2-3-0auth-wallet.git
